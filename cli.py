@@ -5,6 +5,7 @@ from pathlib import Path
 from pypdf import PdfReader
 from detector import detect_bookmarks, detect_contents
 from splitter import split_pdf
+from audit import audit_manifest, print_audit_report
 
 
 def cmd_inspect(args):
@@ -46,6 +47,17 @@ def cmd_detect(args):
     print("Review the manifest before splitting; null start_page values must be corrected.")
 
 
+def cmd_audit(args):
+    report = audit_manifest(
+        args.manifest,
+        pdf_path=args.pdf,
+        last_end_page=args.last_end_page,
+    )
+    print_audit_report(report)
+    if not report["passed"]:
+        raise SystemExit(1)
+
+
 def cmd_split(args):
     report = split_pdf(args.pdf, args.manifest, args.output_dir, last_end_page=args.last_end_page)
     print(f"Split {len(report['chapters'])} chapters into: {report['output_directory']}")
@@ -82,6 +94,15 @@ def build_parser():
     detect.add_argument("--output", default="chapters.json")
     detect.add_argument("--max-contents-pages", type=int, default=50)
     detect.set_defaults(func=cmd_detect)
+    audit = sub.add_parser("audit", help="Validate a chapter manifest before splitting.")
+    audit.add_argument("--manifest", required=True, help="Path to the chapter JSON manifest.")
+    audit.add_argument("--pdf", help="Optional source PDF; verifies page ranges against its actual page count.")
+    audit.add_argument(
+        "--last-end-page", type=int, default=None,
+        help="Optional inclusive final page to use for the last chapter, matching the split override."
+    )
+    audit.set_defaults(func=cmd_audit)
+
     split = sub.add_parser("split", help="Split a PDF using a reviewed JSON manifest.")
     split.add_argument("pdf")
     split.add_argument("--manifest", required=True)

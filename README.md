@@ -98,6 +98,47 @@ Review the manifest before proceeding. Check that:
 
 The detection output should be treated as a proposed set of boundaries, not as an infallible result.
 
+### Audit the manifest before splitting
+
+Run the audit command after detection and after making manual edits. It checks the manifest structure, chapter titles, chapter numbers when present, start/end page values, duplicate starts, overlapping ranges, gaps between explicitly assigned ranges, and page limits.
+
+**Recommended: validate against the source PDF**
+
+```bash
+python cli.py audit --manifest chapters.json --pdf "/path/to/book.pdf"
+```
+
+On Windows PowerShell:
+
+```powershell
+.\\.venv\\Scripts\\python.exe cli.py audit --manifest chapters.json --pdf "C:\\path\\to\\book.pdf"
+```
+
+If the last chapter intentionally ends before the physical end of the PDF, pass the same boundary you plan to use for splitting:
+
+```powershell
+.\\.venv\\Scripts\\python.exe cli.py audit --manifest chapters.json --pdf "C:\\path\\to\\book.pdf" --last-end-page 2695
+```
+
+Replace the example path and page number with values for your own document. The audit command does not modify the manifest or PDF.
+
+You can also audit without a source PDF:
+
+```bash
+python cli.py audit --manifest chapters.json
+```
+
+In this mode, the tool uses `page_count` from the manifest if present and warns that the page count was not independently verified. Passing `--pdf` is recommended.
+
+**How to interpret the result**
+
+- `RESULT: PASS` means no blocking structural or range errors were found. Read warnings and manually inspect chapter starts; a pass does not prove the headings are semantically correct.
+- `RESULT: FAIL` means errors were found. The command exits with status code `1`, which is useful in scripts and CI.
+- Gaps between explicitly specified chapter ranges are reported as warnings because some documents intentionally leave front matter, inserts, or other pages unassigned. Review each gap before splitting.
+- Overlaps, duplicate chapter numbers, duplicate start pages, invalid ranges, and ranges beyond the known page count are errors.
+
+The audit checks consistency and page ranges; it cannot confirm that a page visually contains the correct chapter heading. Always inspect representative pages in the source PDF and resulting chapter files.
+
 ### Split the PDF
 
 ```bash
@@ -182,18 +223,27 @@ The file may be malformed, encrypted, damaged, or restricted. Check that you can
 
 Check the manifest's chapter start pages, calculated end pages, and the `--last-end-page` argument. Confirm that the last page number uses the convention expected by the CLI.
 
-## Development
+## Development and tests
 
-Create and activate a virtual environment, install the dependencies, and run the project's available tests.
+Install the runtime dependency:
 
 ```bash
 python -m pip install -r requirements.txt
-python -m pytest
 ```
 
-The test command assumes that `pytest` is installed and that tests are available in the repository. If the project does not yet include a test suite or declare `pytest` as a development dependency, add those before relying on this command.
+The audit tests use Python's built-in `unittest`, so no test framework needs to be installed:
 
-Check the source code and CLI help for the exact functionality implemented in your checked-out version.
+```bash
+python -m unittest discover -s tests -v
+```
+
+Check available CLI commands with:
+
+```bash
+python cli.py --help
+python cli.py audit --help
+```
+
 
 ## Current limitations
 
