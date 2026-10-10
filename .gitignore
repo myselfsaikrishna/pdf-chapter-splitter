@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Test and tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Generated PDFs and output folders
+output/
+outputs/
+generated/
+*.pdf
+
+# Local generated manifests and temporary files
+/chapters.json
+/fishmanschapters*.json
+*_test.json
+**/split_report.json
+*.tmp
+*.log
+*.crdownload
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+.json

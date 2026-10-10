@@ -1,0 +1,18 @@
+{
+  "source_pdf": "C:/Books/book.pdf",
+  "page_count": 1200,
+  "detection_method": "manual",
+  "review_required": true,
+  "chapters": [
+    {
+      "title": "Chapter 1 - Introduction",
+      "start_page": 25,
+      "end_page": 40
+    },
+    {
+      "title": "Chapter 2 - Fundamentals",
+      "start_page": 41,
+      "end_page": 59
+    }
+  ]
+}
